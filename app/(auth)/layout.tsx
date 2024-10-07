@@ -20,7 +20,7 @@ export default function AuthLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
         >
           <div className="flex flex-col min-h-screen">
