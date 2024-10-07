@@ -1,15 +1,17 @@
 # Nextless Boilerplate 
 
-Tech Stack 📚
-🚀 Next.js & ⚛️ React: Core framework
-🔷 TypeScript: Type safety
-🎨 Tailwind CSS: Styling
-🔐 Supabase: Auth & Backend
-📝 React Hook Form & 🛡️ Zod: Form handling & validation
-🎭 Framer Motion: Animations
-🔧 Radix UI: Accessible UI components
-📅 date-fns: Date utilities
-🛠️ ESLint & PostCSS: Dev tools
+## Tech Stack 📚
+
+- 🚀 Next.js & ⚛️ React: Core framework
+- 🔷 TypeScript: Type safety
+- 🎨 Tailwind CSS: Styling
+- 🔐 Supabase: Auth & Backend
+- 📝 React Hook Form & 🛡️ Zod: Form handling & validation
+- 🎭 Framer Motion: Animations
+- 🔧 Radix UI: Accessible UI components
+- 📅 date-fns: Date utilities
+- 🛠️ ESLint & PostCSS: Dev tools
+
 This stack provides a robust foundation for building modern, type-safe, and performant web applications with efficient styling, authentication, and form handling capabilities.
 
 ## Getting Started
