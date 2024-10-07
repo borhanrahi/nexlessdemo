@@ -6,6 +6,7 @@ import Faqs from "@/components/faqs/Faqs";
 
 
 
+
 export default function Home() {
   return (
 <div>
@@ -14,6 +15,7 @@ export default function Home() {
   <Testimonial/>
   <Pricing/>
   <Faqs/>
+
 </div>
   );
 }

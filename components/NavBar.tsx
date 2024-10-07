@@ -5,14 +5,35 @@ import { Sun, Moon, X, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RainbowButton } from './ui/rainbow-button';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+
+type User = {
+  id: string;
+  name: string;
+};
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ? { name: session.user.email?.split('@')[0] || 'User', ...session.user } : null);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const toggleDarkMode = () => {
@@ -79,14 +100,30 @@ export default function Navbar() {
               </ul>
             </div>
             <div className="hidden items-center gap-4 lg:flex">
-              <Link href="/sign-in" className={`px-4 py-2 text-sm font-medium rounded-md ${theme === 'dark' ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
-                Log in
-              </Link>
-              <Link href="/sign-up">
-                <RainbowButton>
-                  Sign up
-                </RainbowButton>
-              </Link>
+              {user ? (
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    router.push('/');
+                  }}
+                  className="px-4 py-2 text-sm font-medium rounded-md"
+                >
+                  <RainbowButton>
+                    Log out
+                  </RainbowButton>
+                </button>
+              ) : (
+                <>
+                  <Link href="/sign-in" className={`px-4 py-2 text-sm font-medium rounded-md ${theme === 'dark' ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    Log in
+                  </Link>
+                  <Link href="/sign-up">
+                    <RainbowButton>
+                      Sign up
+                    </RainbowButton>
+                  </Link>
+                </>
+              )}
               <button
                 onClick={toggleDarkMode}
                 className="p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
@@ -133,11 +170,23 @@ export default function Navbar() {
                 <Link href="/sign-in" className={`px-4 py-2 text-lg font-medium rounded-md ${theme === 'dark' ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
                   Log in
                 </Link>
-                <Link href="/sign-up">
-                  <RainbowButton>
-                    Sign up
-                  </RainbowButton>
-                </Link>
+                {user ? (
+                  <button
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      router.push('/');
+                    }}
+                    className="px-4 py-2 text-sm font-medium rounded-md bg-red-500 text-white hover:bg-red-600"
+                  >
+                    Log out
+                  </button>
+                ) : (
+                  <Link href="/sign-up">
+                    <RainbowButton>
+                      Sign up
+                    </RainbowButton>
+                  </Link>
+                )}
                 <button
                   onClick={toggleDarkMode}
                   className="p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"

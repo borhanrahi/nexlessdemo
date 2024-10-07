@@ -7,21 +7,30 @@ import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-van
 import { PlaceholdersAndVanishInputRef } from '@/lib/types';
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
+  const router = useRouter();
+
   const emailInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const passwordInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const form = useForm();
 
-  const onSubmit = form.handleSubmit(() => {
-    // Trigger vanish effect on both inputs
-    if (emailInputRef.current && 'triggerVanish' in emailInputRef.current) {
-      (emailInputRef.current as { triggerVanish: () => void }).triggerVanish();
+  const onSubmit = form.handleSubmit(async (values) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      console.error('Error signing in:', error.message);
+      // Handle error (e.g., show error message to user)
+    } else {
+      console.log('Sign in successful:', data);
+      // Redirect to home page
+      router.push('/');
     }
-    if (passwordInputRef.current && 'triggerVanish' in passwordInputRef.current) {
-      (passwordInputRef.current as { triggerVanish: () => void }).triggerVanish();
-    }
-    // Handle login logic here
   });
 
   return (

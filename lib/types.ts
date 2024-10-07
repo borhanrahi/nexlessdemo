@@ -23,3 +23,10 @@ export interface PlaceholdersAndVanishInputProps {
 export interface PlaceholdersAndVanishInputRef extends HTMLInputElement {
   triggerVanish: () => void;
 }
+
+export interface User {
+  // Define user properties here
+  id: string;
+  name: string;
+  // Add other relevant properties
+}

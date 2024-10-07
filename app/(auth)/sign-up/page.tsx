@@ -9,19 +9,23 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
-const signUpSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+export default function SignUp() {
+  const router = useRouter();
 
-export default function SignUpPage() {
+  const signUpSchema = z.object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
   const firstNameInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const lastNameInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const emailInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
@@ -38,15 +42,26 @@ export default function SignUpPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof signUpSchema>) => {
-    console.log("Form submitted with values:", values);
-    // Trigger vanish effect on all inputs
-    [firstNameInputRef, lastNameInputRef, emailInputRef, passwordInputRef, confirmPasswordInputRef].forEach((ref) => {
-      if (ref.current && 'triggerVanish' in ref.current) {
-        (ref.current as { triggerVanish: () => void }).triggerVanish();
-      }
+  const onSubmit = async (values: z.infer<typeof signUpSchema>) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: {
+          first_name: values.firstName,
+          last_name: values.lastName,
+        },
+      },
     });
-    // Handle sign-up logic here
+
+    if (error) {
+      console.error('Error signing up:', error.message);
+      // Handle error (e.g., show error message to user)
+    } else {
+      console.log('Sign up successful:', data);
+      // Redirect to sign-in page
+      router.push('/sign-in');
+    }
   };
 
   return (
