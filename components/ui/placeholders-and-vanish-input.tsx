@@ -67,7 +67,8 @@ export const PlaceholdersAndVanishInput = forwardRef<PlaceholdersAndVanishInputR
     ...inputRef.current!,
     triggerVanish: () => {
       vanishAndSubmit();
-    }
+    },
+    getValue: () => inputRef.current?.value || ''
   }));
 
   const draw = useCallback(() => {
