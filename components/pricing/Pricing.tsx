@@ -1,10 +1,10 @@
-
 'use client'
-
 import { useState } from 'react'
 import { Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { twMerge } from "tailwind-merge";
+import { useStripe } from '@stripe/react-stripe-js';
+import { supabase } from '@/lib/supabase';
 
 // Define the classNames function
 function classNames(...classes: (string | boolean | undefined)[]): string {
@@ -96,7 +96,7 @@ const tiers = [
     name: 'Enterprise',
     id: 'tier-enterprise',
     href: '#',
-    price: 'Custom',
+    price: { monthly: 'Custom', annually: 'Custom' }, // Correct structure
     description: 'Dedicated support and infrastructure for your company.',
     features: [
       'Unlimited products',
@@ -111,14 +111,77 @@ const tiers = [
   },
 ]
 
+// Define a type or interface for the tier if not already defined
+interface Tier {
+  name: string;
+  id: string;
+  href: string;
+  price: {
+    monthly: string;
+    annually: string;
+  };
+  description: string;
+  features: string[];
+  featured: boolean;
+  cta: string;
+}
+
 export default function Pricing() {
   const [frequency, setFrequency] = useState(frequencies[0])
   const [isChecked, setIsChecked] = useState(false)
+  const stripe = useStripe();
 
   const handleToggle = () => {
     setIsChecked(!isChecked)
     setFrequency(isChecked ? frequencies[0] : frequencies[1])
   }
+
+  const handlePurchase = async (tier: Tier) => {
+    if (!stripe) return;
+
+    const response = await fetch('/api/stripe/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        price: parseFloat(
+          String(tier.price[frequency.value as keyof typeof tier.price]).replace('$', '')
+        ),
+        name: tier.name,
+      }),
+    });
+
+    const session = await response.json();
+
+    // Store the subscription information in Supabase
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error('Error getting user:', userError);
+      return;
+    }
+
+    const { error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: userData.user.id,
+        plan_name: tier.name,
+        price: parseFloat(String(tier.price[frequency.value as keyof typeof tier.price]).replace('$', '')),
+        frequency: frequency.value,
+      });
+
+    if (subscriptionError) {
+      console.error('Error storing subscription:', subscriptionError);
+    }
+
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.sessionId,
+    });
+
+    if (result.error) {
+      console.error(result.error.message);
+    }
+  };
 
   return (
     <section className="py-24 sm:py-32 bg-white dark:bg-zinc-900">
@@ -178,13 +241,16 @@ export default function Pricing() {
                 ) : null}
               </p>
               <a
-                href={tier.href}
+                onClick={() => handlePurchase(tier)}
                 aria-describedby={tier.id}
-                className={classNames(
-                  tier.featured
-                    ? 'bg-white/10 text-white hover:bg-white/20 focus-visible:outline-white'
-                    : 'bg-zinc-900 text-white shadow-sm hover:bg-zinc-800 focus-visible:outline-zinc-900',
-                  'mt-6 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                className={twMerge(
+                  classNames(
+                    tier.featured
+                      ? 'bg-white/10 text-white hover:bg-white/20 focus-visible:outline-white'
+                      : 'bg-zinc-900 text-white shadow-sm hover:bg-zinc-800 focus-visible:outline-zinc-900',
+                    'mt-6 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                  ),
+                  'cool-cursor-effect'
                 )}
               >
                 {tier.cta}
@@ -214,3 +280,42 @@ export default function Pricing() {
   )
 }
 
+// Add this CSS at the end of the file or in a separate CSS file
+const styles = `
+  @keyframes cursorEffect {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  .cool-cursor-effect {
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cool-cursor-effect::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+    background-size: 200% 200%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    animation: cursorEffect 1.5s ease infinite;
+  }
+
+  .cool-cursor-effect:hover::before {
+    opacity: 0.3;
+  }
+`;
+
+// Add the styles to the document
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+}

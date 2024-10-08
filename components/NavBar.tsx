@@ -101,17 +101,17 @@ export default function Navbar() {
             </div>
             <div className="hidden items-center gap-4 lg:flex">
               {user ? (
-                <button
-                  onClick={async () => {
+                <>
+                  <Link href="/account" className={`px-4 py-2 text-sm font-medium rounded-md ${theme === 'dark' ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    Account
+                  </Link>
+                  <RainbowButton onClick={async () => {
                     await supabase.auth.signOut();
                     router.push('/');
-                  }}
-                  className="px-4 py-2 text-sm font-medium rounded-md"
-                >
-                  <RainbowButton>
+                  }}>
                     Log out
                   </RainbowButton>
-                </button>
+                </>
               ) : (
                 <>
                   <Link href="/sign-in" className={`px-4 py-2 text-sm font-medium rounded-md ${theme === 'dark' ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
@@ -171,15 +171,17 @@ export default function Navbar() {
                   Log in
                 </Link>
                 {user ? (
-                  <button
-                    onClick={async () => {
+                  <>
+                    <Link href="/account" className={`text-xl font-medium transition-colors ${theme === 'dark' ? 'text-white hover:text-gray-300' : 'text-gray-700 hover:text-gray-900'}`}>
+                      Account
+                    </Link>
+                    <RainbowButton onClick={async () => {
                       await supabase.auth.signOut();
                       router.push('/');
-                    }}
-                    className="px-4 py-2 text-sm font-medium rounded-md bg-red-500 text-white hover:bg-red-600"
-                  >
-                    Log out
-                  </button>
+                    }}>
+                      Log out
+                    </RainbowButton>
+                  </>
                 ) : (
                   <Link href="/sign-up">
                     <RainbowButton>

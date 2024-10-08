@@ -26,8 +26,10 @@ export interface PlaceholdersAndVanishInputRef extends HTMLInputElement {
 }
 
 export interface User {
-  // Define user properties here
   id: string;
   name: string;
+  email?: string;
+  subscription: string;
+  subscription_status: string;
   // Add other relevant properties
 }

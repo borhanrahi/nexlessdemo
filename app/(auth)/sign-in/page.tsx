@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
@@ -12,24 +12,31 @@ import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
 
   const emailInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const passwordInputRef = useRef<PlaceholdersAndVanishInputRef>(null);
   const form = useForm();
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
-    });
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
 
-    if (error) {
-      console.error('Error signing in:', error.message);
-      // Handle error (e.g., show error message to user)
-    } else {
+      if (error) throw error;
+
       console.log('Sign in successful:', data);
-      // Redirect to home page
-      router.push('/');
+      router.push('/'); // Changed from '/account' to '/'
+    } catch (error) {
+      console.error('Error signing in:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setIsLoading(false);
     }
   });
 
@@ -120,8 +127,8 @@ export default function SignInPage() {
                       </FormItem>
                     )}
                   />
-                  <RainbowButton type="submit" onClick={onSubmit}>
-                    Log in
+                  <RainbowButton type="submit" onClick={onSubmit} disabled={isLoading}>
+                    {isLoading ? 'Logging in...' : 'Log in'}
                   </RainbowButton>
                 </div>
               </div>
