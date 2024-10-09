@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase'; // Make sure this import is correct
 
@@ -19,6 +19,14 @@ interface SubscriptionData {
 }
 
 export default function Account() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-zinc-900 flex items-center justify-center">Loading...</div>}>
+      <AccountContent />
+    </Suspense>
+  );
+}
+
+function AccountContent() {
   const [user, setUser] = useState<UserData | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
