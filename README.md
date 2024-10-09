@@ -11,6 +11,7 @@
 - 🔧 Radix UI: Accessible UI components
 - 📅 date-fns: Date utilities
 - 🛠️ ESLint & PostCSS: Dev tools
+- 🔧 For Payment Stripe 
 
 This stack provides a robust foundation for building modern, type-safe, and performant web applications with efficient styling, authentication, and form handling capabilities.
 
