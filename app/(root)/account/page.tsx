@@ -53,7 +53,6 @@ export default function Account() {
 
           if (subscriptionError) {
             console.error('Error fetching subscription:', subscriptionError);
-            // Don't throw here, just log the error
           }
 
           if (subscriptionData) {
